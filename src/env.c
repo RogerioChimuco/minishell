@@ -1,55 +1,49 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   env.c                                              :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: luqalmei <marvin@42.fr>                    +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/06/09 14:59:43 by luqalmei          #+#    #+#             */
-/*   Updated: 2026/06/09 14:59:50 by luqalmei         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
 
-#include "../include/minishell.h"
+#include "minishell.h"
 
 /*
-** env_entry_new — allocate one t_env node from a "KEY=value" string.
-** Both key and val are heap copies so callers can free the original.
+** Parse a raw "KEY=value" string into a new t_env node.
+** Returns NULL on any allocation failure.
 */
-static t_env	*env_entry_new(const char *raw)
+static t_env	*env_node_new(const char *raw, int exported)
 {
-	t_env	*e;
-	char	*eq;
+	t_env		*node;
+	const char	*eq;
+	size_t		klen;
 
-	e = ft_calloc(1, sizeof(t_env));
-	if (!e)
+	node = malloc(sizeof(t_env));
+	if (!node)
 		return (NULL);
-	eq = ft_strchr(raw, '=');
+	eq = strchr(raw, '=');
 	if (eq)
 	{
-		e->key = ft_substr(raw, 0, (size_t)(eq - raw));
-		e->val = ft_strdup(eq + 1);
+		klen = (size_t)(eq - raw);
+		node->key = malloc(klen + 1);
+		if (!node->key)
+			return (free(node), NULL);
+		memcpy(node->key, raw, klen);
+		node->key[klen] = '\0';
+		node->val = msh_strdup(eq + 1);
 	}
 	else
 	{
-		e->key = ft_strdup(raw);
-		e->val = ft_strdup("");
+		node->key = msh_strdup(raw);
+		node->val = msh_strdup("");
 	}
-	if (!e->key || !e->val)
+	if (!node->key || !node->val)
 	{
-		free(e->key);
-		free(e->val);
-		free(e);
-		return (NULL);
+		msh_free((void **)&node->key);
+		msh_free((void **)&node->val);
+		return (free(node), NULL);
 	}
-	e->exported = 1;
-	e->next = NULL;
-	return (e);
+	node->exported = exported;
+	node->next = NULL;
+	return (node);
 }
 
 /*
-** env_build — parse the envp array passed by the OS into a t_env list.
-** Appends a synthetic SHLVL entry if absent (for compatibility).
+** Build the internal env list from the envp array passed to main().
+** Returns NULL if envp is NULL or on first allocation failure.
 */
 t_env	*env_build(char **envp)
 {
@@ -58,37 +52,57 @@ t_env	*env_build(char **envp)
 	t_env	*node;
 	int		i;
 
-	head = NULL;
-	tail = NULL;
-	i = -1;
 	if (!envp)
 		return (NULL);
-	while (envp[++i])
+	head = NULL;
+	tail = NULL;
+	i = 0;
+	while (envp[i])
 	{
-		node = env_entry_new(envp[i]);
+		node = env_node_new(envp[i], 1);
 		if (!node)
-		{
-			env_free(&head);
-			return (NULL);
-		}
+			return (env_free(&head), NULL);
 		if (!head)
 			head = node;
 		else
 			tail->next = node;
 		tail = node;
+		i++;
 	}
 	return (head);
 }
 
 /*
-** env_get — linear search by key; returns the value string or NULL.
-** The returned pointer is owned by the list — do not free it.
+** Free every node in the env list and set *lst to NULL.
+*/
+void	env_free(t_env **lst)
+{
+	t_env	*cur;
+	t_env	*nxt;
+
+	if (!lst || !*lst)
+		return ;
+	cur = *lst;
+	while (cur)
+	{
+		nxt = cur->next;
+		msh_free((void **)&cur->key);
+		msh_free((void **)&cur->val);
+		free(cur);
+		cur = nxt;
+	}
+	*lst = NULL;
+}
+
+/*
+** Return the value string for the given key, or NULL if not found.
+** The returned pointer belongs to the list — do not free it.
 */
 char	*env_get(t_env *env, const char *key)
 {
 	while (env)
 	{
-		if (!ft_strcmp(env->key, key))
+		if (strcmp(env->key, key) == 0)
 			return (env->val);
 		env = env->next;
 	}
@@ -96,100 +110,53 @@ char	*env_get(t_env *env, const char *key)
 }
 
 /*
-** env_set — update an existing key or append a new node.
-** Takes ownership of val (val is freed if the node is later freed).
+** Set (or create) the variable 'key' to 'val'.
+** exported controls whether it appears in child processes.
+** Returns 0 on success, -1 on allocation failure.
 */
-void	env_set(t_env **env, const char *key, char *val)
+int	env_set(t_env **env, const char *key, const char *val, int exported)
 {
 	t_env	*cur;
 	t_env	*node;
+	char	*new_val;
 
 	cur = *env;
 	while (cur)
 	{
-		if (!ft_strcmp(cur->key, key))
+		if (strcmp(cur->key, key) == 0)
 		{
-			free(cur->val);
-			cur->val = val;
-			cur->exported = 1;
-			return ;
+			new_val = msh_strdup(val ? val : "");
+			if (!new_val)
+				return (-1);
+			msh_free((void **)&cur->val);
+			cur->val = new_val;
+			if (exported)
+				cur->exported = 1;
+			return (0);
 		}
-		if (!cur->next)
-			break ;
 		cur = cur->next;
 	}
-	node = ft_calloc(1, sizeof(t_env));
+	node = malloc(sizeof(t_env));
 	if (!node)
-		return ;
-	node->key = ft_strdup(key);
-	node->val = val;
-	node->exported = 1;
-	if (cur)
-		cur->next = node;
-	else
+		return (-1);
+	node->key = msh_strdup(key);
+	node->val = msh_strdup(val ? val : "");
+	node->exported = exported;
+	node->next = NULL;
+	if (!node->key || !node->val)
+	{
+		msh_free((void **)&node->key);
+		msh_free((void **)&node->val);
+		return (free(node), -1);
+	}
+	if (!*env)
 		*env = node;
-}
-
-/*
-** env_free — free every node in the list and NULL the head pointer.
-*/
-void	env_free(t_env **env)
-{
-	t_env	*cur;
-	t_env	*nxt;
-
-	if (!env || !*env)
-		return ;
-	cur = *env;
-	while (cur)
+	else
 	{
-		nxt = cur->next;
-		free(cur->key);
-		free(cur->val);
-		free(cur);
-		cur = nxt;
+		cur = *env;
+		while (cur->next)
+			cur = cur->next;
+		cur->next = node;
 	}
-	*env = NULL;
-}
-
-/*
-** env_to_array — convert the linked list to a NULL-terminated char** array
-** in "KEY=value" format, suitable for passing to execve(2).
-*/
-char	**env_to_array(t_env *env)
-{
-	t_env	*cur;
-	char	**arr;
-	char	*tmp;
-	int		n;
-	int		i;
-
-	n = 0;
-	cur = env;
-	while (cur)
-	{
-		if (cur->exported)
-			n++;
-		cur = cur->next;
-	}
-	arr = ft_calloc(n + 1, sizeof(char *));
-	if (!arr)
-		return (NULL);
-	i = 0;
-	cur = env;
-	while (cur)
-	{
-		if (cur->exported)
-		{
-			tmp = ft_strjoin(cur->key, "=");
-			arr[i] = ft_strjoin(tmp, cur->val);
-			free(tmp);
-			if (!arr[i])
-				return (free_matrix(arr), NULL);
-			i++;
-		}
-		cur = cur->next;
-	}
-	arr[i] = NULL;
-	return (arr);
+	return (0);
 }

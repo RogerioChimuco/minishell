@@ -1,148 +1,137 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: luqalmei <marvin@42.fr>                    +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/06/09 15:01:05 by luqalmei          #+#    #+#             */
-/*   Updated: 2026/06/09 15:01:11 by luqalmei         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-#include "include/minishell.h"
 
-volatile sig_atomic_t	g_sig = 0;
+#include "minishell.h"
 
-/*
-** ms_init — zero-fill the shell struct and build the env list from envp.
-** Called once at startup before entering the main loop.
-*/
-void	ms_init(t_shell *sh, char **envp)
+static void	msh_init(t_msh *sh, char **envp)
 {
-	sh->prompt = NULL;
 	sh->line = NULL;
+	sh->prompt = NULL;
 	sh->tokens = NULL;
-	sh->cmds = NULL;
+	sh->pipeline = NULL;
+	sh->status = 0;
 	sh->env = env_build(envp);
-	sh->envp = NULL;
-	sh->exit_code = 0;
-	sh->ncmds = 0;
-	sh->pipes = NULL;
-	sh->pids = NULL;
-	sh->npids = 0;
-	sig_interactive();
-	build_prompt(sh);
 }
 
-/*
-** ms_reset — release per-cycle allocations (tokens, cmds, line, envp array).
-** Called at the end of every iteration so the next readline is clean.
-*/
-void	ms_reset(t_shell *sh)
+static void	msh_cleanup(t_msh *sh)
 {
-	if (sh->line)
-	{
-		free(sh->line);
-		sh->line = NULL;
-	}
-	if (sh->tokens)
-		node_free_all(&sh->tokens, free_token);
-	if (sh->cmds)
-		node_free_all(&sh->cmds, free_cmd);
-	if (sh->envp)
-	{
-		free_matrix(sh->envp);
-		sh->envp = NULL;
-	}
-	if (sh->pipes)
-	{
-		free(sh->pipes);
-		sh->pipes = NULL;
-	}
-	if (sh->pids)
-	{
-		free(sh->pids);
-		sh->pids = NULL;
-	}
-	sh->ncmds = 0;
-	sh->npids = 0;
-}
-
-/*
-** ms_destroy — called once on clean exit to free the env list and prompt.
-*/
-void	ms_destroy(t_shell *sh)
-{
-	ms_reset(sh);
+	msh_free((void **)&sh->line);
+	msh_free((void **)&sh->prompt);
+	tokens_free(&sh->tokens);
+	pipeline_free(&sh->pipeline);
 	env_free(&sh->env);
-	if (sh->prompt)
-		free(sh->prompt);
-	rl_clear_history();
 }
 
 /*
-** read_line — call readline (or getline when stdin is not a tty).
-** Returns NULL on EOF, sets g_sig when Ctrl-C interrupts.
+** Read one line of input.
+** Returns: 1 ready, 0 EOF, -1 skip (empty / SIGINT).
 */
-static char	*read_line(t_shell *sh)
+static int	msh_readline(t_msh *sh)
 {
-	char	*line;
-
 	g_sig = 0;
-	line = ms_readline(sh->prompt);
-	if (!line)
+	msh_free((void **)&sh->prompt);
+	sh->prompt = prompt_build(sh->env);
+	sh->line = readline(sh->prompt);
+	if (!sh->line)
 	{
 		if (isatty(STDIN_FILENO))
 			write(STDOUT_FILENO, "exit\n", 5);
-		return (NULL);
+		return (0);
 	}
 	if (g_sig == SIGINT)
 	{
-		free(line);
-		sh->exit_code = 130;
-		return (NULL);
+		msh_free((void **)&sh->line);
+		sh->status = 130;
+		return (-1);
 	}
-	return (line);
+	if (sh->line[0] == '\0')
+	{
+		msh_free((void **)&sh->line);
+		return (-1);
+	}
+	add_history(sh->line);
+	return (1);
 }
 
 /*
-** shell_loop — the main REPL.
-** Reads a line, validates quotes, tokenises, parses, expands, executes.
+** Run quote check, then lex, then syntax-validate tokens.
+** Returns 1 on success, 0 on any error (sh->status set to 2).
 */
-static void	shell_loop(t_shell *sh)
+static int	msh_lex_and_validate(t_msh *sh)
 {
+	if (!syntax_quotes_ok(sh->line))
+	{
+		fprintf(stderr,
+			"minishell: syntax error: unclosed quote\n");
+		sh->status = 2;
+		return (0);
+	}
+	tokens_free(&sh->tokens);
+	sh->tokens = lexer_run(sh->line);
+	if (!sh->tokens)
+	{
+		fprintf(stderr, "minishell: syntax error\n");
+		sh->status = 2;
+		return (0);
+	}
+	if (!syntax_tokens_ok(sh->tokens))
+	{
+		sh->status = 2;
+		return (0);
+	}
+	return (1);
+}
+
+/*
+** Parse the validated token list into a pipeline of t_cmd nodes.
+** Returns 1 on success, 0 on allocation failure.
+*/
+static int	msh_parse(t_msh *sh)
+{
+	pipeline_free(&sh->pipeline);
+	sh->pipeline = parser_run(sh->tokens);
+	if (!sh->pipeline)
+	{
+		fprintf(stderr, "minishell: parse error\n");
+		sh->status = 1;
+		return (0);
+	}
+	return (1);
+}
+
+/*
+** Main read-eval loop.
+*/
+static void	msh_loop(t_msh *sh)
+{
+	int	rc;
+
 	while (1)
 	{
-		sh->line = read_line(sh);
-		if (!sh->line)
+		signals_interactive();
+		rc = msh_readline(sh);
+		if (rc == 0)
 			break ;
-		if (sh->line[0] == '\0')
-		{
-			free(sh->line);
-			sh->line = NULL;
+		if (rc < 0)
 			continue ;
-		}
-		if (!ms_validate(sh->line))
-		{
-			sh->exit_code = 2;
-			ms_reset(sh);
-			build_prompt(sh);
+		if (!msh_lex_and_validate(sh))
 			continue ;
-		}
-		add_history(sh->line);
-		ms_reset(sh);
-		build_prompt(sh);
+		if (!msh_parse(sh))
+			continue ;
+		/*
+		** Executor will be added in commit 3.
+		** Pipeline is built and ready in sh->pipeline.
+		*/
 	}
 }
 
 int	main(int argc, char **argv, char **envp)
 {
-	t_shell	sh;
+	t_msh	sh;
 
 	(void)argc;
 	(void)argv;
-	ms_init(&sh, envp);
-	shell_loop(&sh);
-	ms_destroy(&sh);
-	return (sh.exit_code);
+	msh_init(&sh, envp);
+	msh_loop(&sh);
+	msh_cleanup(&sh);
+	rl_clear_history();
+	return (sh.status);
 }
