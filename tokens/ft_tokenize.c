@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_tokenize.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ahuanga <marvin@42fr>                      +#+  +:+       +#+        */
+/*   By: luqalmei <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/01/23 12:47:47 by ckulembe          #+#    #+#             */
-/*   Updated: 2026/04/09 18:30:56 by ahuanga          ###   ########.fr       */
+/*   Created: 2026/07/09 12:53:09 by luqalmei          #+#    #+#             */
+/*   Updated: 2026/07/09 12:53:11 by luqalmei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,7 @@ t_list	*ft_tokenize(const char *line)
 	return (free(tokens), list);
 }
 
-int	ft_extract_word_in(t_list **tokens, const char *line, t_data d)
+int	extract_quoted_word(t_list **tokens, const char *line, t_data d)
 {
 	char	*_addr;
 
@@ -76,6 +76,13 @@ int	ft_extract_word_in(t_list **tokens, const char *line, t_data d)
 	return (0);
 }
 
+static void	add_token_and_advance(t_list **tokens, const char *line,
+		int start, int token_end, int n_val, int *n)
+{
+	ft_add_token(tokens, line, start, token_end - start);
+	*n = n_val;
+}
+
 void	ft_extract_word(t_list **tokens,
 			const char *line, int *n, int start)
 {
@@ -85,23 +92,19 @@ void	ft_extract_word(t_list **tokens,
 	while (*(line + i) && !ft_is_space(*(line + i)))
 	{
 		if (ft_is_operator(line, i))
-		{
-			ft_add_token(tokens, line, start, i - start);
-			*n = i;
-			return ;
-		}
-		if (ft_extract_word_in(tokens, line, ft_data(start, &i, n)))
+			return (add_token_and_advance(tokens, line, start, i, i, n));
+		if (extract_quoted_word(tokens, line, build_word_data(start, &i, n)))
 			return ;
 		if (!line[i + 1] && (ft_is_operator(line, i + 1)
 				|| ft_is_space(line[i + 1])))
 		{
-			ft_add_token(tokens, line, start, i - start);
-			*n = i + 1;
+			add_token_and_advance(tokens, line, start, i, i + 1, n);
 			break ;
 		}
 		i++;
 	}
 	if (i > start)
-		ft_add_token(tokens, line, start, i - start);
-	*n = i;
+		add_token_and_advance(tokens, line, start, i, i, n);
+	else
+		*n = i;
 }

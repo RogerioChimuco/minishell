@@ -3,57 +3,80 @@
 /*                                                        :::      ::::::::   */
 /*   historic.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ahuanga <marvin@42fr>                      +#+  +:+       +#+        */
+/*   By: luqalmei <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/01/20 10:26:56 by ahuanga           #+#    #+#             */
-/*   Updated: 2026/04/09 18:30:56 by ahuanga          ###   ########.fr       */
+/*   Created: 2026/07/09 12:55:01 by luqalmei          #+#    #+#             */
+/*   Updated: 2026/07/09 12:55:04 by luqalmei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
 #include "utils.h"
 
 void	ft_historic(void *line)
 {
-	if (ft_isprint(((char *)line)[0]))
-		add_history(line);
+	char	*str;
+
+	str = (char *)line;
+	if (!str || str[0] == '\0' || !ft_isprint(str[0]))
+		return ;
+	add_history(str);
+}
+
+static int	count_vars(t_env *vars)
+{
+	int	count;
+
+	count = 0;
+	while (vars)
+	{
+		count++;
+		vars = vars->next;
+	}
+	return (count);
+}
+
+static int	entry_is_valid(char *entry)
+{
+	return (ft_strchr(entry, '=') != NULL);
+}
+
+static int	fill_envp(char **envp, t_env *vars)
+{
+	int		idx;
+	char	*entry;
+
+	idx = 0;
+	while (vars)
+	{
+		entry = var_add(vars);
+		if (!entry)
+			return (0);
+		if (entry_is_valid(entry))
+			envp[idx++] = entry;
+		else
+			free(entry);
+		vars = vars->next;
+	}
+	envp[idx] = NULL;
+	return (1);
 }
 
 void	envp_update(t_shell *shell)
 {
-	t_env	*tmp;
-	int		i;
+	char	**new_envp;
+	int		max;
 
 	if (!shell)
 		return ;
+	max = count_vars(shell->vars);
+	new_envp = ft_calloc(max + 1, sizeof(char *));
+	if (!new_envp)
+		return ;
+	if (!fill_envp(new_envp, shell->vars))
+	{
+		matriz_delete(new_envp);
+		return ;
+	}
 	if (shell->envp)
 		matriz_delete(shell->envp);
-	shell->envp = ft_calloc(env_size(shell->vars) + 1, sizeof(char *));
-	if (!shell->envp)
-		return ;
-	i = -1;
-	tmp = shell->vars;
-	while (tmp)
-	{
-		shell->envp[++i] = var_add(tmp);
-		if (!shell->envp[i])
-			return (matriz_delete(shell->envp));
-		if (!ft_strchr(shell->envp[i], '='))
-			free(shell->envp[i--]);
-		tmp = tmp->next;
-	}
-}
-
-char	*home_path(t_env *env)
-{
-	char	*home;
-	char	*path;
-
-	home = ft_getenv(env, "HOME");
-	if (!home)
-		return (NULL);
-	path = ft_strjoin("HOME_PATH=", home);
-	if (!path)
-		return (free(home), NULL);
-	free(home);
-	return (path);
+	shell->envp = new_envp;
 }

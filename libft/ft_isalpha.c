@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_isalpha.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ahuanga <marvin@42fr>                      +#+  +:+       +#+        */
+/*   By: rochimuc <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/07/01 22:19:26 by ckulembe          #+#    #+#             */
-/*   Updated: 2026/02/10 10:56:42 by ahuanga          ###   ########.fr       */
+/*   Created: 2025/08/11 19:08:10 by rochimuc          #+#    #+#             */
+/*   Updated: 2025/08/11 20:49:59 by rochimuc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,5 +14,10 @@
 
 int	ft_isalpha(int c)
 {
-	return ((c >= 65 && c <= 90) || (c >= 97 && c <= 122));
+	unsigned char	uc;
+
+	if (c == -1)
+		return (0);
+	uc = (unsigned char)c;
+	return ((uc >= 'A' && uc <= 'Z') || (uc >= 'a' && uc <= 'z'));
 }

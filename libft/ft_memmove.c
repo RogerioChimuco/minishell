@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_memmove.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ckulembe <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: rochimuc <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/07/02 01:33:27 by ckulembe          #+#    #+#             */
-/*   Updated: 2025/07/05 14:54:32 by ckulembe         ###   ########.fr       */
+/*   Created: 2025/09/04 01:43:19 by rochimuc          #+#    #+#             */
+/*   Updated: 2025/09/05 01:44:44 by rochimuc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,25 +14,24 @@
 
 void	*ft_memmove(void *dest, const void *src, size_t n)
 {
-	unsigned const char	*bt_src;
-	unsigned char		*bt_dest;
-	size_t				i;
+	unsigned char		*d;
+	const unsigned char	*s;
 
-	if ((!dest && n > 0) || !src)
+	if (dest == NULL || src == NULL)
 		return (NULL);
-	bt_src = (unsigned const char *) src;
-	bt_dest = (unsigned char *) dest;
-	i = 0;
-	if (dest > src)
+	d = (unsigned char *)dest;
+	s = (const unsigned char *)src;
+	if (d < s)
+	{
 		while (n--)
-			*(bt_dest + n) = *(bt_src + n);
+			*d++ = *s++;
+	}
 	else
 	{
-		while (i < n)
-		{
-			*(bt_dest + i) = *(bt_src + i);
-			i++;
-		}
+		d += n;
+		s += n;
+		while (n--)
+			*--d = *--s;
 	}
 	return (dest);
 }

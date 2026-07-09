@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils_tokens2.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ahuanga <marvin@42fr>                      +#+  +:+       +#+        */
+/*   By: luqalmei <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/04/09 22:34:21 by ahuanga           #+#    #+#             */
-/*   Updated: 2026/04/09 22:34:26 by ahuanga          ###   ########.fr       */
+/*   Created: 2026/07/09 12:54:08 by luqalmei          #+#    #+#             */
+/*   Updated: 2026/07/09 12:54:09 by luqalmei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,10 +27,8 @@ int	ft_extract_operator(t_list **tokens, const char *line, int *n)
 {
 	int	oplen;
 
-	oplen = 1;
-	if (line[*n + 1] && (line[*n] == '<' || line[*n] == '>')
-		&& line[*n] == line[*n + 1])
-		oplen = 2;
+	oplen = 1 + (line[*n + 1] && (line[*n] == '<' || line[*n] == '>')
+			&& line[*n] == line[*n + 1]);
 	ft_add_token(tokens, line, *n, oplen);
 	*n += oplen;
 	return (1);
@@ -51,29 +49,42 @@ void	ft_add_token(t_list **tokens, const char *line,
 	ft_lstadd_back(tokens, node);
 }
 
-void	var_get_key_value(char *var, char **key, char **value)
+static void	no_equal_split(char *var, char **key, char **value)
 {
-	char	*tmp;
-	int		k_size;
+	*key = ft_strdup(var);
+	*value = ft_strdup("");
+}
 
-	tmp = ft_strchr(var, '=');
-	if (!tmp)
-	{
-		*key = ft_strdup(var);
-		*value = ft_strdup("");
-	}
-	else
-	{
-		k_size = (tmp - var) + 1;
-		*key = malloc(k_size);
+static void	equal_split(char *var, char *tmp, char **key, char **value)
+{
+	int	k_size;
+
+	k_size = (tmp - var) + 1;
+	*key = malloc(k_size);
+	if (*key)
 		ft_strlcpy(*key, var, k_size);
-		*value = ft_strdup(tmp + 1);
-	}
+	*value = ft_strdup(tmp + 1);
+}
+
+static void	rollback_key_value(char **key, char **value)
+{
 	if (!*key || !*value)
 	{
 		free(*key);
 		free(*value);
-		*value = NULL;
 		*key = NULL;
+		*value = NULL;
 	}
+}
+
+void	var_get_key_value(char *var, char **key, char **value)
+{
+	char	*tmp;
+
+	tmp = ft_strchr(var, '=');
+	if (!tmp)
+		no_equal_split(var, key, value);
+	else
+		equal_split(var, tmp, key, value);
+	rollback_key_value(key, value);
 }

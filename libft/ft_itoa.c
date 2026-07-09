@@ -3,61 +3,60 @@
 /*                                                        :::      ::::::::   */
 /*   ft_itoa.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ckulembe <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: rochimuc <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/06/21 16:42:30 by ckulembe          #+#    #+#             */
-/*   Updated: 2025/06/25 19:01:21 by ckulembe         ###   ########.fr       */
+/*   Created: 2025/09/24 04:16:06 by rochimuc          #+#    #+#             */
+/*   Updated: 2025/09/24 22:19:37 by rochimuc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-static int	count_number(int n)
+static int	ft_numlen(long n)
 {
-	int	count;
+	int	len;
 
-	count = 0;
+	len = 0;
 	if (n <= 0)
-		count = 1;
-	while (n != 0)
+		len = 1;
+	if (n < 0)
+		n = -n;
+	while (n > 0)
 	{
 		n /= 10;
-		count++;
+		len++;
 	}
-	return (count);
+	return (len);
 }
 
-static void	calc(char *dest, long num, int len)
+static char	*ft_convert(char *s, long nbr)
 {
-	int	i;
-
-	i = len;
-	while (num > 0)
-	{
-		dest[--i] = (num % 10) + '0';
-		num /= 10;
-	}
+	if (nbr >= 10)
+		s = ft_convert(s, nbr / 10);
+	*s = (nbr % 10) + '0';
+	return (s + 1);
 }
 
 char	*ft_itoa(int n)
 {
+	char	*str;
+	char	*end_ptr;
+	long	nbr;
 	int		len;
-	char	*dest;
-	long	number;
 
-	len = count_number(n);
-	dest = malloc(len + 1);
-	if (!dest)
+	nbr = n;
+	len = ft_numlen(nbr);
+	str = (char *)malloc(sizeof(char) * (len + 1));
+	if (!str)
 		return (NULL);
-	dest[len] = '\0';
-	number = n;
-	if (number == 0)
-		dest[0] = '0';
-	if (number < 0)
+	if (nbr < 0)
 	{
-		dest[0] = '-';
-		number = -number;
+		str[0] = '-';
+		nbr = -nbr;
+		end_ptr = ft_convert(str + 1, nbr);
 	}
-	calc(dest, number, len);
-	return (dest);
+	else
+		end_ptr = ft_convert(str, nbr);
+	*end_ptr = '\0';
+	return (str);
 }

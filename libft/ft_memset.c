@@ -3,35 +3,30 @@
 /*                                                        :::      ::::::::   */
 /*   ft_memset.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ckulembe <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: rochimuc <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/07/01 22:59:32 by ckulembe          #+#    #+#             */
-/*   Updated: 2025/07/01 23:15:30 by ckulembe         ###   ########.fr       */
+/*   Created: 2025/09/03 23:32:40 by rochimuc          #+#    #+#             */
+/*   Updated: 2025/09/05 01:39:49 by rochimuc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-static int	ft_invalid_params(void *s, size_t n)
-{
-	if (!s && n > 0)
-		return (0);
-	return (1);
-}
-
 void	*ft_memset(void *s, int c, size_t n)
 {
-	unsigned char	*bs;
-	size_t			i;
+	unsigned char	*ptn;
+	unsigned char	v;
+	size_t			qnt;
 
-	if (!ft_invalid_params(s, n))
+	qnt = 0;
+	v = (unsigned char)c;
+	if (s == NULL)
 		return (NULL);
-	i = 0;
-	bs = (unsigned char *)s;
-	while (i < n)
+	ptn = (unsigned char *)s;
+	while (qnt < n)
 	{
-		*(bs + i) = (unsigned char)c;
-		i++;
+		ptn[qnt] = v;
+		qnt++;
 	}
 	return (s);
 }

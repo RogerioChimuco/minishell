@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ahuanga <marvin@42fr>                      +#+  +:+       +#+        */
+/*   By: luqalmei <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/01/20 10:29:24 by ahuanga           #+#    #+#             */
-/*   Updated: 2026/04/09 13:12:46 by ahuanga          ###   ########.fr       */
+/*   Created: 2026/07/09 12:55:29 by luqalmei          #+#    #+#             */
+/*   Updated: 2026/07/09 12:55:36 by luqalmei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,5 +29,12 @@ char	*ft_readline(char *prompt);
 char	*home_path(t_env *env);
 t_env	*env_add(char *var);
 t_env	*env_get(char **env, char *home);
+char	*prompt_user(t_env *env);
+char	*prompt_path(t_env *env);
+char	*concat_and_free(char *s1, char *s2);
+void	apply_home_shorthand(char **path, char *home);
+int		push_computed_var(char *value, t_env **head, t_env **tail);
+int		push_home_path(t_env **head, t_env **tail);
+int		push_path_home(t_env **head, t_env **tail);
 
 #endif

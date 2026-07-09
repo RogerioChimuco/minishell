@@ -1,7 +1,21 @@
-NAME = libft.a
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: rochimuc <marvin@42.fr>                    +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2025/09/27 23:47:34 by rochimuc          #+#    #+#              #
+#    Updated: 2026/01/16 21:05:22 by rochimuc         ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
 
-CC = cc
-CFLAGS = -Wall -Wextra -Werror -fPIC
+NAME   = libft.a
+CC     = cc
+HEADER = libft.h
+CFLAGS = -Wall -Wextra -Werror
+AR     = ar -rcs
+RM     = rm -f
 
 SRCS = ft_isalpha.c ft_isdigit.c ft_isalnum.c ft_isascii.c ft_isprint.c \
 	ft_strlen.c ft_memset.c ft_bzero.c ft_memcpy.c ft_memmove.c \
@@ -11,32 +25,29 @@ SRCS = ft_isalpha.c ft_isdigit.c ft_isalnum.c ft_isascii.c ft_isprint.c \
 	ft_strtrim.c ft_split.c ft_itoa.c ft_putchar_fd.c ft_putstr_fd.c \
 	ft_putendl_fd.c ft_strmapi.c ft_putnbr_fd.c ft_striteri.c ft_strcmp.c
 
-BONUS_SRCS = ft_lstnew.c ft_lstlast.c ft_lstsize.c ft_lstmap.c ft_lstdelone.c\
-	   ft_lstadd_front.c ft_lstadd_back.c ft_lstclear.c ft_lstiter.c
+BONUS_SRCS = ft_lstnew.c ft_lstsize.c ft_lstadd_front.c ft_lstadd_back.c \
+	ft_lstdelone.c ft_lstclear.c ft_lstiter.c ft_lstlast.c ft_lstmap.c
 
 OBJS = $(SRCS:.c=.o)
 BONUS_OBJS = $(BONUS_SRCS:.c=.o)
 
-all:	$(NAME)
+all: $(NAME)
 
-$(NAME): 	$(OBJS)
-	ar rcs $@ $^
+$(NAME): $(OBJS)
+	$(AR) $(NAME) $(OBJS)
 
-bonus: $(NAME) .bonus
+bonus: $(OBJS) $(BONUS_OBJS)
+	$(AR) $(NAME) $(OBJS) $(BONUS_OBJS)
 
-.bonus: $(BONUS_OBJS)
-	ar rcs $(NAME) $(BONUS_OBJS)
-	touch $@
-
-$(OBJS): libft.h
-$(BONUS_OBJS): libft.h
+%.o: %.c $(HEADER)
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OBJS) $(BONUS_OBJS)
+	$(RM) $(OBJS) $(BONUS_OBJS)
 
 fclean: clean
-	rm -f $(NAME) .bonus
+	$(RM) $(NAME)
 
-re:	fclean all
+re: fclean all
 
-.PHONY: all clean fclean re bonus
+.PHONY: all bonus clean fclean re

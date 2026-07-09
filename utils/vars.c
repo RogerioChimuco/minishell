@@ -3,57 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   vars.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ahuanga <marvin@42fr>                      +#+  +:+       +#+        */
+/*   By: luqalmei <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/02/10 09:18:17 by ahuanga           #+#    #+#             */
-/*   Updated: 2026/04/09 18:30:56 by ahuanga          ###   ########.fr       */
+/*   Created: 2026/07/09 12:55:43 by luqalmei          #+#    #+#             */
+/*   Updated: 2026/07/09 12:55:46 by luqalmei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "utils.h"
 
-static void	var_append(t_env **tmp, t_env **var, t_env **tail);
-static void	append(char *var, t_env	**env, t_env **tail, t_env **tmp);
-static void	append_path_home(t_env **env, t_env **tail, t_env **tmp);
-
-t_env	*env_get(char **env, char *home)
-{
-	t_env	*var;
-	t_env	*tmp;
-	t_env	*tail;
-	int		i;
-
-	if (!env || !*env)
-		return (NULL);
-	i = -1;
-	var = NULL;
-	tail = NULL;
-	tmp = NULL;
-	while (env[++i])
-		append(env[i], &var, &tail, &tmp);
-	home = home_path(var);
-	if (home)
-	{
-		append(home, &var, &tail, &tmp);
-		free(home);
-	}
-	append(NULL, &var, &tail, &tmp);
-	return (var);
-}
-
-static void	var_append(t_env **tmp, t_env **var, t_env **tail)
-{
-	if (!*var)
-	{
-		*var = *tmp;
-		*tail = *tmp;
-	}
-	else
-	{
-		(*tail)->next = *tmp;
-		*tail = *tmp;
-	}
-}
+static void	list_push(t_env **head, t_env **tail, t_env *node);
+static int	push_var(char *str, t_env **head, t_env **tail);
 
 t_env	*env_add(char *var)
 {
@@ -66,11 +26,7 @@ t_env	*env_add(char *var)
 	env = malloc(sizeof(t_env));
 	var_get_key_value(var, &key, &value);
 	if (!env || !key || !value)
-	{
-		free(env);
-		ft_free((void *)&key, (void *)&value);
-		return (NULL);
-	}
+		return (free(env), ft_free((void **)&key, (void **)&value), NULL);
 	env->key = key;
 	env->value = value;
 	env->exported = 1;
@@ -78,36 +34,60 @@ t_env	*env_add(char *var)
 	return (env);
 }
 
-static void	append(char *var, t_env	**env, t_env **tail, t_env	**tmp)
+static void	list_push(t_env **head, t_env **tail, t_env *node)
 {
-	if (var)
-	{
-		*tmp = env_add(var);
-		if (!*tmp)
-			return ((env_delete(env)));
-		var_append(tmp, env, tail);
-	}
+	if (!*head)
+		*head = node;
 	else
-		append_path_home(env, tail, tmp);
+		(*tail)->next = node;
+	*tail = node;
 }
 
-static void	append_path_home(t_env **env, t_env **tail, t_env **tmp)
+static int	push_var(char *str, t_env **head, t_env **tail)
 {
-	char	*path;
-	char	*value;
+	t_env	*node;
 
-	path = ft_getenv(*env, "HOME");
-	if (!path)
-		return ;
-	value = ft_strjoin("PATH_HOME=", path);
+	node = env_add(str);
+	if (!node)
+		return (env_delete(head), 0);
+	list_push(head, tail, node);
+	return (1);
+}
+
+int	push_computed_var(char *value, t_env **head, t_env **tail)
+{
+	int	ok;
+
 	if (!value)
-		return (free(path));
-	*tmp = env_add(value);
-	if (!*tmp)
+		return (1);
+	ok = push_var(value, head, tail);
+	free(value);
+	return (ok);
+}
+
+t_env	*env_get(char **env, char *home)
+{
+	t_env	*head;
+	t_env	*tail;
+	int		i;
+	int		(*extra[2])(t_env **, t_env **);
+
+	(void)home;
+	if (!env || !*env)
+		return (NULL);
+	head = NULL;
+	tail = NULL;
+	while (*env)
 	{
-		ft_free((void *)&path, (void *)&value);
-		return (env_delete(env));
+		if (!push_var(*env, &head, &tail))
+			return (NULL);
+		env++;
 	}
-	var_append(tmp, env, tail);
-	ft_free((void *)&path, (void *)&value);
+	extra[0] = push_home_path;
+	extra[1] = push_path_home;
+	i = -1;
+	while (++i < 2)
+		if (!extra[i](&head, &tail))
+			return (NULL);
+	return (head);
 }

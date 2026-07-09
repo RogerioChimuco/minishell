@@ -3,30 +3,42 @@
 /*                                                        :::      ::::::::   */
 /*   ft_strjoin.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ahuanga <marvin@42fr>                      +#+  +:+       +#+        */
+/*   By: rochimuc <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/06/18 23:16:11 by ckulembe          #+#    #+#             */
-/*   Updated: 2026/03/26 11:18:38 by ahuanga          ###   ########.fr       */
+/*   Created: 2025/09/15 12:40:38 by rochimuc          #+#    #+#             */
+/*   Updated: 2025/09/23 20:47:44 by rochimuc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
+static void	ft_strcpy(char *dst, const char *org)
+{
+	size_t	i;
+
+	i = 0;
+	while (org[i])
+	{
+		dst[i] = org[i];
+		i++;
+	}
+	dst[i] = '\0';
+}
+
 char	*ft_strjoin(char const *s1, char const *s2)
 {
-	char	*ptr;
-	int		i;
+	char	*n_str;
+	size_t	len1;
+	size_t	len2;
 
 	if (!s1 || !s2)
 		return (NULL);
-	ptr = (char *) malloc((ft_strlen(s1) + ft_strlen(s2) + 1) * sizeof(char));
-	if (ptr == NULL)
+	len1 = ft_strlen(s1);
+	len2 = ft_strlen(s2);
+	n_str = (char *) malloc (sizeof(char) *(len1 + len2 +1));
+	if (!n_str)
 		return (NULL);
-	i = 0;
-	while (*s1)
-		ptr[i++] = *s1++;
-	while (*s2)
-		ptr[i++] = *s2++;
-	ptr[i] = '\0';
-	return (ptr);
+	ft_strcpy(n_str, s1);
+	ft_strcpy(n_str + len1, s2);
+	return (n_str);
 }

@@ -3,51 +3,78 @@
 /*                                                        :::      ::::::::   */
 /*   handler_signal.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ahuanga <marvin@42fr>                      +#+  +:+       +#+        */
+/*   By: luqalmei <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/01/20 15:15:39 by ahuanga           #+#    #+#             */
-/*   Updated: 2026/04/07 17:04:06 by ahuanga          ###   ########.fr       */
+/*   Created: 2026/07/09 12:54:53 by luqalmei          #+#    #+#             */
+/*   Updated: 2026/07/09 12:54:55 by luqalmei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "utils.h"
-#include "../get_next_line/get_next_line.h"
 
-void	setup_prompt_signal(void)
+static void	reset_prompt_line(void)
 {
-	signal(SIGINT, handler);
-	signal(SIGQUIT, SIG_IGN);
-}
-
-void	handler_exec(int sig)
-{
-	g_signal = sig;
+	write(1, "\n", 1);
+	rl_replace_line("", 0);
+	rl_on_new_line();
+	rl_redisplay();
+	rl_done = 1;
 }
 
 void	handler(int sig)
 {
-	if (sig == SIGINT)
-	{
-		g_signal = SIGINT;
-		write(1, "\n", 1);
-		rl_done = 1;
-		rl_replace_line("", 0);
-		rl_on_new_line();
-		rl_redisplay();
-	}
+	if (sig != SIGINT)
+		return ;
+	g_signal = SIGINT;
+	reset_prompt_line();
 }
 
-char	*ft_readline(char *prompt)
+void	handler_exec(int sig)
 {
-	char	*line;
+	static const char	*msgs[] = {"\n", "Quit (core dumped)\n"};
 
-	if (isatty(fileno(stdin)))
-		return (readline(prompt));
-	else
+	g_signal = sig;
+	if (sig == SIGINT)
+		write(1, msgs[0], 1);
+	else if (sig == SIGQUIT)
+		write(1, msgs[1], 19);
+}
+
+void	setup_prompt_signal(void)
+{
+	struct sigaction	sa_int;
+	struct sigaction	sa_quit;
+
+	sa_int.sa_handler = handler;
+	sigemptyset(&sa_int.sa_mask);
+	sa_int.sa_flags = 0;
+	sigaction(SIGINT, &sa_int, NULL);
+	sa_quit.sa_handler = SIG_IGN;
+	sigemptyset(&sa_quit.sa_mask);
+	sa_quit.sa_flags = 0;
+	sigaction(SIGQUIT, &sa_quit, NULL);
+}
+
+void	ft_prompt(char **prompt, t_env *env)
+{
+	char	*user;
+	char	*path;
+	char	*step;
+
+	if (*prompt)
+		ft_free((void **)prompt, NULL);
+	user = prompt_user(env);
+	path = prompt_path(env);
+	step = concat_and_free(user, ":");
+	if (step)
+		step = concat_and_free(step, path);
+	free(path);
+	if (!step)
 	{
-		line = get_next_line(fileno(stdin));
-		prompt = ft_strtrim(line, "\n");
-		free(line);
+		*prompt = ft_strdup("minishel$ ");
+		return ;
 	}
-	return (prompt);
+	*prompt = concat_and_free(step, "$ ");
+	if (!*prompt)
+		*prompt = ft_strdup("minishel$ ");
 }

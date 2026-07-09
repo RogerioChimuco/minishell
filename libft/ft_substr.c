@@ -3,43 +3,57 @@
 /*                                                        :::      ::::::::   */
 /*   ft_substr.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ckulembe <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: rochimuc <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/06/18 19:02:56 by ckulembe          #+#    #+#             */
-/*   Updated: 2025/06/25 06:58:46 by ckulembe         ###   ########.fr       */
+/*   Created: 2025/09/07 17:07:32 by rochimuc          #+#    #+#             */
+/*   Updated: 2025/09/15 12:36:18 by rochimuc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-static char	*ft_copy(char const *s, unsigned int start, unsigned int end)
+static char	*no_str(void)
 {
-	unsigned int		i;
-	char				*ptr;
+	char	*ps;
 
-	i = 0;
-	ptr = (char *) malloc((end - start + 1) * sizeof(char));
-	if (ptr == NULL)
+	ps = (char *)malloc(1);
+	if (!ps)
 		return (NULL);
-	while (i < end - start)
-	{
-		*(ptr + i) = *(s + start + i);
-		i++;
-	}
-	*(ptr + i) = '\0';
-	return (ptr);
+	ps[0] = '\0';
+	return (ps);
+}
+
+static size_t	cps_len(unsigned int start, size_t len, size_t s_len)
+{
+	if (start >= s_len)
+		return (0);
+	if (s_len - start < len)
+		return (s_len - start);
+	return (len);
 }
 
 char	*ft_substr(char const *s, unsigned int start, size_t len)
 {
-	size_t	n;
-	char	*ptr;
+	char	*ps;
+	size_t	j;
+	size_t	s_len;
+	size_t	ps_len;
 
-	if (!s || start >= ft_strlen(s))
-		return (ft_strdup(""));
-	n = 0;
-	while (*(s + start + n) && n < len)
-		n++;
-	ptr = ft_copy(s, start, start + n);
-	return (ptr);
+	if (!s)
+		return (NULL);
+	s_len = ft_strlen(s);
+	if (start >= s_len)
+		return (no_str());
+	j = 0;
+	ps_len = cps_len(start, len, s_len);
+	ps = (char *)malloc(ps_len + 1);
+	if (!ps)
+		return (NULL);
+	while (j < ps_len)
+	{
+		ps[j] = s[start + j];
+		j++;
+	}
+	ps[j] = '\0';
+	return (ps);
 }

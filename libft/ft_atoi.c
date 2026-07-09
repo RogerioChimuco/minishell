@@ -3,40 +3,63 @@
 /*                                                        :::      ::::::::   */
 /*   ft_atoi.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ckulembe <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: rochimuc <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/06/18 08:39:51 by ckulembe          #+#    #+#             */
-/*   Updated: 2025/07/07 19:38:36 by ckulembe         ###   ########.fr       */
+/*   Created: 2025/09/05 05:08:41 by rochimuc          #+#    #+#             */
+/*   Updated: 2026/01/17 15:07:47 by rochimuc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-int	ft_atoi(const char *str)
+static const char	*ft_skispace(const char *str)
 {
-	long long	number;
-	int			sign;
-
-	if (!str)
-		return (0);
-	sign = 1;
-	number = 0;
-	while (*str == 32 || (*str >= 9 && *str <= 13))
+	while ((*str >= 9 && *str <= 13) || *str == 32)
 		str++;
+	return (str);
+}
+
+static const char	*ft_getsign(const char *str, int *sign)
+{
 	if (*str == '-' || *str == '+')
 	{
 		if (*str == '-')
-			sign *= -sign;
+			*sign = -1;
 		str++;
 	}
-	while (*str >= 48 && *str <= 57)
+	return (str);
+}
+
+static int	ft_overflow(long nbr, int digit, int sign)
+{
+	if (sign == 1 && (nbr > (INT_MAX - digit) / 10))
+		return (1);
+	if (sign == -1 && (-nbr < (INT_MIN + digit) / 10))
+		return (1);
+	return (0);
+}
+
+int	ft_atoi(const char *nptr)
+{
+	long	nbr;
+	int		sign;
+
+	if (!nptr)
+		return (0);
+	sign = 1;
+	nbr = 0;
+	nptr = ft_skispace(nptr);
+	nptr = ft_getsign(nptr, &sign);
+	while (ft_isdigit(*nptr))
 	{
-		number = number * 10 + (*str - '0');
-		if (sign == 1 && number > INT_MAX)
-			return (-1);
-		if (sign == -1 && number < INT_MIN)
-			return (0);
-		str++;
+		if (ft_overflow(nbr, *nptr - '0', sign))
+		{
+			if (sign == 1)
+				return (INT_MAX);
+			return (INT_MIN);
+		}
+		nbr = nbr * 10 + (*nptr - '0');
+		nptr++;
 	}
-	return ((int)number * sign);
+	return ((int)(nbr * sign));
 }

@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   minishell.h                                        :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: ahuanga <marvin@42fr>                      +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/01/16 13:37:42 by ckulembe          #+#    #+#             */
-/*   Updated: 2026/03/26 09:18:56 by ahuanga          ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #ifndef MINISHELL_H
 # define MINISHELL_H
 
@@ -41,11 +29,11 @@
 # include "types.h"
 # include "utils/utils.h"
 # include "tokens/tokens.h"
-# include "parse/parse.h"
-# include "expansion/expansion.h"
-# include "executor/redir.h"
-# include "builtin/built_in.h"
-# include "get_next_line/get_next_line.h"
+# include "parser/parse.h"
+# include "env_expansion/expansion.h"
+# include "execution/redir.h"
+# include "builtins/builtins.h"
+# include "gnl/get_next_line.h"
 
 extern volatile sig_atomic_t	g_signal;
 

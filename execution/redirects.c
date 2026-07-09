@@ -1,0 +1,55 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   redirects.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: luqalmei <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/07/09 13:00:14 by luqalmei          #+#    #+#             */
+/*   Updated: 2026/07/09 13:00:17 by luqalmei         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "redir.h"
+
+static int	open_with_flags(char *filename, int flags, mode_t mode)
+{
+	int	filename_fd;
+
+	filename_fd = open(filename, flags, mode);
+	if (filename_fd == -1)
+		return (-1);
+	return (filename_fd);
+}
+
+int	open_input_redir(char *filename)
+{
+	return (open_with_flags(filename, O_RDONLY, 0));
+}
+
+int	open_output_redir(char *filename)
+{
+	return (open_with_flags(filename, O_WRONLY | O_CREAT | O_TRUNC, 0777));
+}
+
+int	open_append_redir(char *filename)
+{
+	return (open_with_flags(filename, O_WRONLY | O_CREAT | O_APPEND, 0777));
+}
+
+int	open_heredoc_redir(char *delimiter, t_shell *shell)
+{
+	int		pipefd[2];
+	pid_t	pid;
+
+	pid = heredoc_fork(delimiter, pipefd, shell);
+	if (pid == -1)
+		return (-1);
+	return (heredoc_wait(pid, pipefd, delimiter, shell));
+}
+
+int	open_file_redir(int *fd, char *value, int (*f)(char *))
+{
+	*fd = f(value);
+	return (*fd);
+}

@@ -3,83 +3,76 @@
 /*                                                        :::      ::::::::   */
 /*   ft_split.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ahuanga <marvin@42fr>                      +#+  +:+       +#+        */
+/*   By: rochimuc <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/06/19 23:27:35 by ckulembe          #+#    #+#             */
-/*   Updated: 2026/02/28 21:14:26 by ahuanga          ###   ########.fr       */
+/*   Created: 2025/09/23 20:48:21 by rochimuc          #+#    #+#             */
+/*   Updated: 2025/09/24 22:22:04 by rochimuc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-static int	ft_count(char const *s, char c)
+size_t	ft_numsepa(char const *s, char c)
 {
+	int	letter;
 	int	word;
-	int	i;
 
-	if (!s || *s == '\0')
-		return (0);
+	letter = 0;
 	word = 0;
+	while (*s)
+	{
+		if (*s != c && !word)
+		{
+			letter ++;
+			word = 1;
+		}
+		if (*s == c)
+			word = 0;
+		s ++;
+	}
+	return (letter);
+}
+
+size_t	ft_array(char **array, const char *s, char c)
+{
+	size_t	j;
+	size_t	i;
+	size_t	sep;
+
 	i = 0;
+	sep = 0;
 	while (s[i])
 	{
-		if (s[i] != c && (i == 0 || s[i - 1] == c))
-			word++;
-		i++;
+		while (s[i] && s[i] == c)
+			i++;
+		if (s[i])
+		{
+			j = i;
+			while (s[i] && s[i] != c)
+				i++;
+			array[sep] = ft_substr(s, j, i - j);
+			sep++;
+			j = i + 1;
+		}
 	}
-	return (word);
-}
-
-static char	*ft_next_word(char const *s, char c, int *start)
-{
-	char	*ptr;
-	size_t	len;
-
-	len = 0;
-	while (s[*start] && s[*start] == c)
-		(*start)++;
-	while (s[*start + len] && s[*start + len] != c)
-		len++;
-	ptr = ft_substr(s, *start, len);
-	*start = *start + (int)len;
-	return (ptr);
-}
-
-static void	ft_free(char **ptr, int qun)
-{
-	int	i;
-
-	i = 0;
-	while (i < qun)
-		free(ptr[i++]);
-	free(ptr);
+	return (sep);
 }
 
 char	**ft_split(char const *s, char c)
 {
-	char	**ptr;
-	int		words;
-	int		i;
-	int		start;
+	char	**array;
+	size_t	sep;
 
 	if (!s)
-		return (NULL);
-	words = ft_count(s, c);
-	ptr = (char **) malloc((words + 1) * sizeof(char *));
-	if (!ptr)
-		return (NULL);
-	i = 0;
-	start = 0;
-	while (i < words)
+		return (0);
+	sep = ft_numsepa(s, c);
+	array = malloc ((sep + 1) * sizeof(char *));
+	if (!array)
 	{
-		ptr[i] = ft_next_word(s, c, &start);
-		if (!ptr[i])
-		{
-			ft_free(ptr, words);
-			return (NULL);
-		}
-		i++;
+		free(array);
+		return (NULL);
 	}
-	ptr[i] = NULL;
-	return (ptr);
+	ft_array(array, s, c);
+	array[sep] = NULL;
+	return (array);
 }

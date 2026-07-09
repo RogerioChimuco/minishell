@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_tolower.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ckulembe <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: rochimuc <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/07/02 07:43:32 by ckulembe          #+#    #+#             */
-/*   Updated: 2025/07/02 07:46:42 by ckulembe         ###   ########.fr       */
+/*   Created: 2025/09/05 01:59:51 by rochimuc          #+#    #+#             */
+/*   Updated: 2025/09/05 02:44:37 by rochimuc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,10 @@
 
 int	ft_tolower(int c)
 {
-	if (c >= 65 && c <= 90)
-		return (c += 32);
-	return (c);
+	unsigned char	n;
+
+	n = (unsigned char)c;
+	if (n >= 65 && n <= 90)
+		n = n + 32;
+	return ((int)n);
 }
