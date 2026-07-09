@@ -6,7 +6,7 @@
 /*   By: rochimuc <rochimuc@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/09 17:53:30 by rochimuc          #+#    #+#             */
-/*   Updated: 2026/07/09 17:53:35 by rochimuc         ###   ########.fr       */
+/*   Updated: 2026/07/09 18:22:11 by rochimuc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,8 +66,10 @@ int	ft_validate_quotes(const char *line)
 		line++;
 	}
 	if (quote_state == 1)
-		return (print_syntax_err(2, "minishell: syntax error: unclosed single quote"));
+		return (print_syntax_err(2,
+				"minishell: syntax error: unclosed single quote"));
 	if (quote_state == 2)
-		return (print_syntax_err(3, "minishell: syntax error: unclosed double quote"));
+		return (print_syntax_err(3,
+				"minishell: syntax error: unclosed double quote"));
 	return (0);
 }

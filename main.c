@@ -6,7 +6,7 @@
 /*   By: rochimuc <rochimuc@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/09 17:53:40 by rochimuc          #+#    #+#             */
-/*   Updated: 2026/07/09 17:53:53 by rochimuc         ###   ########.fr       */
+/*   Updated: 2026/07/09 18:18:46 by rochimuc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,8 @@ static void	init_minishell(t_shell *shell)
 
 static int	fetch_user_line(t_shell *shell)
 {
+	int	j;
+
 	g_signal = 0;
 	shell->input = ft_readline(shell->prompt);
 	if (!shell->input)
