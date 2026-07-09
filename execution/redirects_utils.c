@@ -12,9 +12,6 @@
 
 #include "../minishell.h"
 
-static char	*read_line_count_fd(int fd);
-static void	print_heredoc_warning(t_shell *shell, char *delimiter);
-
 void	set_heredoc_signals(void)
 {
 	signal(SIGINT, SIG_IGN);
@@ -25,21 +22,6 @@ static void	close_fd_pair(int *fds)
 {
 	close(fds[0]);
 	close(fds[1]);
-}
-
-static pid_t	cleanup_heredoc_fork_error(int *pipefd, t_shell *shell)
-{
-	close_fd_pair(pipefd);
-	close_fd_pair(shell->pipe_lineno);
-	signal(SIGINT, handler);
-	return (-1);
-}
-
-static void	spawn_heredoc_child(char *delimiter, int *pipefd, t_shell *shell)
-{
-	close(pipefd[0]);
-	close(shell->pipe_lineno[0]);
-	run_heredoc_child(delimiter, pipefd[1], shell);
 }
 
 int	heredoc_fork(char *delimiter, int *pipefd, t_shell *shell)
@@ -53,9 +35,18 @@ int	heredoc_fork(char *delimiter, int *pipefd, t_shell *shell)
 	set_heredoc_signals();
 	pid = fork();
 	if (pid == -1)
-		return (cleanup_heredoc_fork_error(pipefd, shell));
+	{
+		close_fd_pair(pipefd);
+		close_fd_pair(shell->pipe_lineno);
+		signal(SIGINT, handler);
+		return (-1);
+	}
 	if (pid == 0)
-		spawn_heredoc_child(delimiter, pipefd, shell);
+	{
+		close(pipefd[0]);
+		close(shell->pipe_lineno[0]);
+		run_heredoc_child(delimiter, pipefd[1], shell);
+	}
 	close(pipefd[1]);
 	close(shell->pipe_lineno[1]);
 	return (pid);
@@ -84,36 +75,4 @@ int	heredoc_wait(pid_t pid, int *pipefd, char *delimiter, t_shell *shell)
 		return (print_heredoc_warning(shell, delimiter), pipefd[0]);
 	close(shell->pipe_lineno[0]);
 	return (pipefd[0]);
-}
-
-static void	print_heredoc_warning(t_shell *shell, char *delimiter)
-{
-	char	*line;
-
-	line = ft_itoa(shell->line_count);
-	ft_putstr_fd("minishell: warning: here-document at line ", 1);
-	ft_putstr_fd(line, 1);
-	ft_putstr_fd(" delimited by end-of-file (wanted `", 1);
-	ft_putstr_fd(delimiter, 1);
-	ft_putstr_fd("`)\n", 1);
-	ft_free((void *)&line, 0);
-	line = read_line_count_fd(shell->pipe_lineno[0]);
-	shell->line_count += ft_atoi(line);
-	ft_free((void *)&line, 0);
-}
-
-static char	*read_line_count_fd(int fd)
-{
-	char		*buffer;
-	ssize_t		n;
-
-	buffer = malloc(42);
-	if (!buffer)
-		return (NULL);
-	n = read(fd, buffer, 41);
-	if (n < 0)
-		return (ft_free((void *)&buffer, 0), NULL);
-	buffer[n] = 0;
-	close(fd);
-	return (buffer);
 }

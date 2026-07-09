@@ -3,19 +3,21 @@
 /*                                                        :::      ::::::::   */
 /*   ft_swap.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rochimuc <franciscogama99@outlook.com>     +#+  +:+       +#+        */
+/*   By: rochimuc <rochimuc@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/19 12:42:00 by rochimuc          #+#    #+#             */
-/*   Updated: 2026/02/19 12:43:57 by rochimuc         ###   ########.fr       */
+/*   Updated: 2026/07/09 18:41:17 by rochimuc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-void ft_swap(int *a, int *b) {
-  int c = 0;
+void	ft_swap(int *a, int *b)
+{
+	int	c;
 
-  c = *a;
-  *a = *b;
-  *b = c;
+	c = 0;
+	c = *a;
+	*a = *b;
+	*b = c;
 }

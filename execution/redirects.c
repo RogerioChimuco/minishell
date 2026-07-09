@@ -12,29 +12,19 @@
 
 #include "redir.h"
 
-static int	open_with_flags(char *filename, int flags, mode_t mode)
-{
-	int	filename_fd;
-
-	filename_fd = open(filename, flags, mode);
-	if (filename_fd == -1)
-		return (-1);
-	return (filename_fd);
-}
-
 int	open_input_redir(char *filename)
 {
-	return (open_with_flags(filename, O_RDONLY, 0));
+	return (open(filename, O_RDONLY));
 }
 
 int	open_output_redir(char *filename)
 {
-	return (open_with_flags(filename, O_WRONLY | O_CREAT | O_TRUNC, 0777));
+	return (open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0777));
 }
 
 int	open_append_redir(char *filename)
 {
-	return (open_with_flags(filename, O_WRONLY | O_CREAT | O_APPEND, 0777));
+	return (open(filename, O_WRONLY | O_CREAT | O_APPEND, 0777));
 }
 
 int	open_heredoc_redir(char *delimiter, t_shell *shell)

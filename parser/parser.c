@@ -1,10 +1,20 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   parser.c                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: rochimuc <rochimuc@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/07/09 19:05:04 by rochimuc          #+#    #+#             */
+/*   Updated: 2026/07/09 19:05:13 by rochimuc         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "parse.h"
 
 static t_command	*ft_set_cmd(t_list **lst);
 static t_command	*ft_extract_cmd(t_list **lst, int i);
-static int			ft_process_token(t_list **lst, t_command *cmd,
-						int *i);
+static int			ft_process_token(t_list **lst, t_command *cmd, int *i);
 
 t_list	*ft_parser(t_list *lst)
 {
@@ -41,14 +51,14 @@ static t_command	*ft_set_cmd(t_list **lst)
 
 	if (!lst || !*lst)
 		return (NULL);
-	cmd = (t_command *) malloc(sizeof(t_command));
+	cmd = (t_command *)malloc(sizeof(t_command));
 	if (!cmd)
 		return (NULL);
 	cmd->args = NULL;
 	cmd->path = NULL;
 	cmd->redir = NULL;
 	ft_word_count(*lst, &length);
-	cmd->args = (char **) ft_calloc (length + 1, sizeof(char *));
+	cmd->args = (char **)ft_calloc(length + 1, sizeof(char *));
 	if (!cmd->args)
 		return (free(cmd), NULL);
 	cmd->is_builtin = 0;
@@ -58,9 +68,9 @@ static t_command	*ft_set_cmd(t_list **lst)
 
 static int	ft_process_token(t_list **lst, t_command *cmd, int *i)
 {
-	t_token		*token;
-	t_redir		*redir;
-	t_list		*node;
+	t_token	*token;
+	t_redir	*redir;
+	t_list	*node;
 
 	token = (t_token *)(*lst)->content;
 	if (token->type == PIPE)

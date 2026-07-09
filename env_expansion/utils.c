@@ -1,3 +1,14 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   utils.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: rochimuc <rochimuc@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/07/09 18:48:14 by rochimuc          #+#    #+#             */
+/*   Updated: 2026/07/09 18:48:16 by rochimuc         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "expansion.h"
 
@@ -72,8 +83,7 @@ char	*get_error(char *token, int *error, int *i)
 	return (token);
 }
 
-char	*update_token(char *token, const char *content, int *i,
-				int var_length)
+char	*update_token(char *token, const char *content, int *i, int var_length)
 {
 	char	*new_token;
 	int		length[3];
@@ -89,8 +99,8 @@ char	*update_token(char *token, const char *content, int *i,
 	ft_memcpy(new_token, token, pos);
 	ft_memcpy(new_token + pos, content, (length[1]));
 	*i = pos + length[1] - 1;
-	ft_strlcpy(new_token + (*i + 1), token
-		+ (pos + 1 + var_length), (length[2]));
+	ft_strlcpy(new_token + (*i + 1), token + (pos + 1 + var_length),
+		(length[2]));
 	free(token);
 	return (new_token);
 }

@@ -49,3 +49,30 @@ int	check_ambiguous_redirect(t_redir *redir)
 	redir->amb = (is_redir && count_words(redir->value, ' ') != 1);
 	return (-redir->amb);
 }
+
+static int	get_error_message_and_code(int err, char **msg)
+{
+	if (err == ENOENT)
+		return (*msg = "No such file or directory", 127);
+	if (err == EACCES)
+		return (*msg = "Permission denied", 126);
+	if (err == EISDIR)
+		return (*msg = "Is a directory", 126);
+	if (err == ENOEXEC)
+		return (*msg = "Exec format error", 126);
+	return (*msg = strerror(err), 1);
+}
+
+int	print_command_error(const char *cmd, int err)
+{
+	char	*msg;
+	int		code;
+
+	ft_putstr_fd((char *)cmd, 2);
+	write(2, ": ", 2);
+	if (!ft_strchr(cmd, '/'))
+		return (ft_putendl_fd("command not found", 2), 127);
+	code = get_error_message_and_code(err, &msg);
+	ft_putendl_fd(msg, 2);
+	return (code);
+}

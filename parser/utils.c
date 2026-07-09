@@ -1,3 +1,14 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   utils.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: rochimuc <rochimuc@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/07/09 19:05:08 by rochimuc          #+#    #+#             */
+/*   Updated: 2026/07/09 19:05:11 by rochimuc         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "parse.h"
 
@@ -32,7 +43,7 @@ t_redir	*ft_redirnew(t_list *lst)
 	if (!lst)
 		return (NULL);
 	token = (t_token *)lst->content;
-	redir = (t_redir *) malloc(sizeof(t_redir));
+	redir = (t_redir *)malloc(sizeof(t_redir));
 	if (!redir)
 		return (NULL);
 	next = lst->next;

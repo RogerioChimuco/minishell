@@ -12,24 +12,17 @@
 
 #include "../minishell.h"
 
-typedef int	(*t_step_fn)(t_shell *);
-
 static int	setup_pipes_and_pids(t_shell *shell)
 {
-	static const char	*labels[2] = {"pipe", "pids"};
-	t_step_fn			steps[2];
-	int					i;
-
-	steps[0] = create_pipes;
-	steps[1] = create_pids;
-	i = -1;
-	while (++i < 2)
+	if (create_pipes(shell) == -1)
 	{
-		if (steps[i](shell) == -1)
-		{
-			perror(labels[i]);
-			return (-1);
-		}
+		perror("pipe");
+		return (-1);
+	}
+	if (create_pids(shell) == -1)
+	{
+		perror("pids");
+		return (-1);
 	}
 	return (0);
 }

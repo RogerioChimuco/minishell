@@ -1,4 +1,14 @@
-
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   expansion.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: rochimuc <rochimuc@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/07/09 18:48:02 by rochimuc          #+#    #+#             */
+/*   Updated: 2026/07/09 18:48:04 by rochimuc         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "expansion.h"
 
@@ -27,7 +37,7 @@ void	ft_expasion(t_list **tokens, int *error, t_env *vars)
 
 char	*heredoc_expand(char *line, t_shell *shell)
 {
-	int			i;
+	int	i;
 
 	i = -1;
 	while (line[++i])
@@ -36,8 +46,8 @@ char	*heredoc_expand(char *line, t_shell *shell)
 		{
 			if (line[i + 1] == '?')
 				line = get_error(line, &shell->exit_status, &i);
-			line = ft_token_expend(line, shell->vars,
-					get_var_name(line + i), &i);
+			line = ft_token_expend(line, shell->vars, get_var_name(line + i),
+					&i);
 			if (!line)
 				return (NULL);
 		}

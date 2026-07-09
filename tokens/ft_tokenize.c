@@ -76,13 +76,6 @@ int	extract_quoted_word(t_list **tokens, const char *line, t_data d)
 	return (0);
 }
 
-static void	add_token_and_advance(t_list **tokens, const char *line,
-		int start, int token_end, int n_val, int *n)
-{
-	ft_add_token(tokens, line, start, token_end - start);
-	*n = n_val;
-}
-
 void	ft_extract_word(t_list **tokens,
 			const char *line, int *n, int start)
 {
@@ -92,19 +85,12 @@ void	ft_extract_word(t_list **tokens,
 	while (*(line + i) && !ft_is_space(*(line + i)))
 	{
 		if (ft_is_operator(line, i))
-			return (add_token_and_advance(tokens, line, start, i, i, n));
+			break ;
 		if (extract_quoted_word(tokens, line, build_word_data(start, &i, n)))
 			return ;
-		if (!line[i + 1] && (ft_is_operator(line, i + 1)
-				|| ft_is_space(line[i + 1])))
-		{
-			add_token_and_advance(tokens, line, start, i, i + 1, n);
-			break ;
-		}
 		i++;
 	}
 	if (i > start)
-		add_token_and_advance(tokens, line, start, i, i, n);
-	else
-		*n = i;
+		ft_add_token(tokens, line, start, i - start);
+	*n = i;
 }

@@ -30,6 +30,7 @@ SRC_EXPAND   = env_expansion/expansion.c \
 SRC_EXECUTOR = execution/redir_utils.c \
 	       execution/redirects.c \
 	       execution/redirects_utils.c \
+	       execution/heredoc_utils.c \
 	       execution/executor.c \
 	       execution/ambiguous_redirect.c \
 	       execution/child.c \

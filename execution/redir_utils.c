@@ -12,43 +12,30 @@
 
 #include "redir.h"
 
-typedef struct s_redir_map
+static int	resolve_file_redir(t_redir *redir, int *fd, int *target_fd)
 {
-	t_token_type	type;
-	int				target_fd;
-	int				(*open_fn)(char *);
-}	t_redir_map;
-
-static int	resolve_heredoc_target(t_redir *redir, int *fd, int *target_fd)
-{
+	if (check_ambiguous_redirect(redir) == -1)
+		return (-1);
+	if (redir->type == REDIR_IN)
+	{
+		*target_fd = STDIN_FILENO;
+		return (open_file_redir(fd, redir->value, open_input_redir));
+	}
+	if (redir->type == REDIR_OUT)
+	{
+		*target_fd = STDOUT_FILENO;
+		return (open_file_redir(fd, redir->value, open_output_redir));
+	}
+	if (redir->type == REDIR_APPEND)
+	{
+		*target_fd = STDOUT_FILENO;
+		return (open_file_redir(fd, redir->value, open_append_redir));
+	}
 	*target_fd = STDIN_FILENO;
 	*fd = redir->fd;
 	if (*fd == -1)
 		return (-1);
 	return (0);
-}
-
-static int	resolve_file_redir(t_redir *redir, int *fd, int *target_fd)
-{
-	static const t_redir_map	map[3] = {
-		{REDIR_IN, STDIN_FILENO, open_input_redir},
-		{REDIR_OUT, STDOUT_FILENO, open_output_redir},
-		{REDIR_APPEND, STDOUT_FILENO, open_append_redir}
-	};
-	int							i;
-
-	if (check_ambiguous_redirect(redir) == -1)
-		return (-1);
-	i = -1;
-	while (++i < 3)
-	{
-		if (redir->type == map[i].type)
-		{
-			*target_fd = map[i].target_fd;
-			return (open_file_redir(fd, redir->value, map[i].open_fn));
-		}
-	}
-	return (resolve_heredoc_target(redir, fd, target_fd));
 }
 
 int	open_heredoc_redir_fd(int *fd, char *value,
@@ -74,20 +61,18 @@ void	print_redir_error(char *token, int is_ambiguous)
 	ft_putendl_fd(strerror(errno), STDERR_FILENO);
 }
 
-static void	init_fd_targets(int *fd, int *target_fd)
-{
-	*fd = -1;
-	*target_fd = -1;
-}
-
 static int	apply_single_redir(t_redir *redir, int *fd, int *target_fd)
 {
 	if (resolve_file_redir(redir, fd, target_fd) == -1)
-		return (print_redir_error(get_redir_display_value(redir), redir->amb), -1);
+	{
+		print_redir_error(get_redir_display_value(redir), redir->amb);
+		return (-1);
+	}
 	if (*fd != -1 && dup2(*fd, *target_fd) == -1)
 	{
 		close(*fd);
-		return (print_redir_error(get_redir_display_value(redir), redir->amb), -1);
+		print_redir_error(get_redir_display_value(redir), redir->amb);
+		return (-1);
 	}
 	if (*fd != -1)
 		close(*fd);
@@ -100,7 +85,8 @@ int	apply_redirections(t_list *lst)
 	int		target_fd;
 	t_redir	*redir;
 
-	init_fd_targets(&fd, &target_fd);
+	fd = -1;
+	target_fd = -1;
 	while (lst)
 	{
 		redir = (t_redir *)lst->content;

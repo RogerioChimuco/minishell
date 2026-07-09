@@ -3,20 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   ft_get_token_type.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: luqalmei <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: rochimuc <rochimuc@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/09 12:52:54 by luqalmei          #+#    #+#             */
-/*   Updated: 2026/07/09 12:53:02 by luqalmei         ###   ########.fr       */
+/*   Updated: 2026/07/09 18:42:50 by rochimuc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "tokens.h"
-
-typedef struct s_op_map
-{
-	const char		*op;
-	t_token_type	type;
-}	t_op_map;
 
 static t_token_type	classify_operator_type(char *operator, size_t length);
 
@@ -27,31 +21,23 @@ void	ft_get_token_type(void *arg)
 
 	if (!arg)
 		return ;
-	token = (t_token *) arg;
+	token = (t_token *)arg;
 	length = ft_strlen(token->value);
 	token->type = classify_operator_type(token->value, length);
 }
 
 static t_token_type	classify_operator_type(char *operator, size_t length)
 {
-	static const t_op_map	map[5] = {
-		{"<", REDIR_IN},
-		{">", REDIR_OUT},
-		{"|", PIPE},
-		{"<<", HEREDOC},
-		{">>", REDIR_APPEND}
-	};
-	int						i;
-
-	if (length < 1 || length > 2)
-		return (WORD);
-	i = -1;
-	while (++i < 5)
-	{
-		if (ft_strlen(map[i].op) == length
-			&& !ft_strncmp(operator, map[i].op, length))
-			return (map[i].type);
-	}
+	if (length == 1 && operator[0] == '<')
+		return (REDIR_IN);
+	if (length == 1 && operator[0] == '>')
+		return (REDIR_OUT);
+	if (length == 1 && operator[0] == '|')
+		return (PIPE);
+	if (length == 2 && operator[0] == '<' && operator[1] == '<')
+		return (HEREDOC);
+	if (length == 2 && operator[0] == '>' && operator[1] == '>')
+		return (REDIR_APPEND);
 	return (WORD);
 }
 

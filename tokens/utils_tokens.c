@@ -37,15 +37,6 @@ t_data	build_word_data(int start, int *i, int *n)
 	return (data);
 }
 
-static void	free_and_null(void **ptr)
-{
-	if (*ptr)
-	{
-		free(*ptr);
-		*ptr = NULL;
-	}
-}
-
 void	token_clear(void *arg)
 {
 	t_token	*token;
@@ -53,7 +44,7 @@ void	token_clear(void *arg)
 	if (!arg)
 		return ;
 	token = (t_token *)arg;
-	free_and_null((void **)&token->value);
-	free_and_null((void **)&token->original_value);
+	free(token->value);
+	free(token->original_value);
 	free(token);
 }

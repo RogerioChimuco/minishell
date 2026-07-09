@@ -1,3 +1,14 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   expend.c                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: rochimuc <rochimuc@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/07/09 18:48:07 by rochimuc          #+#    #+#             */
+/*   Updated: 2026/07/09 18:49:17 by rochimuc         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "expansion.h"
 
@@ -7,8 +18,8 @@ static int	quote_manager(t_token *token, int *i, int in_double_quote)
 {
 	if (!token->value[*i + 1])
 		return (0);
-	if (!in_double_quote
-		&& (token->value[*i + 1] == '"' || token->value[*i + 1] == '\''))
+	if (!in_double_quote && (token->value[*i + 1] == '"'
+			|| token->value[*i + 1] == '\''))
 	{
 		token->value = update_token(token->value, "", i, 0);
 		if (!token->value)
@@ -52,8 +63,8 @@ int	expand_str(t_token *token, t_env *vars, int *error, int *i)
 
 void	ft_expand(t_token *token, int *error, t_env *vars)
 {
-	int		i;
-	int		quote[3];
+	int	i;
+	int	quote[3];
 
 	if (!token)
 		return ;

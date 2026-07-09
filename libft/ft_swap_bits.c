@@ -1,17 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   swap_bits.c                                        :+:      :+:    :+:   */
+/*   ft_swap_bits.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rochimuc <franciscogama99@outlook.com>     +#+  +:+       +#+        */
+/*   By: rochimuc <rochimuc@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/23 14:28:59 by rochimuc          #+#    #+#             */
-/*   Updated: 2026/02/23 14:30:16 by rochimuc         ###   ########.fr       */
+/*   Updated: 2026/07/09 18:41:31 by rochimuc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-unsigned char ft_swap_bits(unsigned char octet) {
-  return ((octet >> 4 | octet << 4));
+unsigned char	ft_swap_bits(unsigned char octet)
+{
+	return ((octet >> 4 | octet << 4));
 }

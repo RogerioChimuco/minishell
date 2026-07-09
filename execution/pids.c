@@ -46,3 +46,34 @@ void	wait_pids(t_shell *shell, int pid_i)
 	free(shell->pids);
 	shell->pids = NULL;
 }
+
+void	restore_fds(int in, int out)
+{
+	dup2(in, STDIN_FILENO);
+	dup2(out, STDOUT_FILENO);
+	close(in);
+	close(out);
+}
+
+void	check_exec_permissions(const char *path)
+{
+	struct stat	st;
+
+	if (!ft_strchr(path, '/'))
+		return ;
+	if (stat(path, &st) < 0)
+	{
+		print_command_error(path, ENOENT);
+		exit(127);
+	}
+	if (S_ISDIR(st.st_mode))
+	{
+		print_command_error(path, EISDIR);
+		exit(126);
+	}
+	if (!(st.st_mode & S_IXUSR))
+	{
+		print_command_error(path, EACCES);
+		exit(126);
+	}
+}

@@ -12,9 +12,7 @@
 
 #include "minishell.h"
 
-static void	start_prompt_loop(t_shell *shell);
-
-static void	start_prompt_loop(t_shell *shell)
+void	start_prompt_loop(t_shell *shell)
 {
 	int	status;
 
@@ -40,6 +38,23 @@ static int	print_syntax_err(int status_code, char *err_msg)
 	return (status_code);
 }
 
+static int	update_quote_state(char c, int quote_state)
+{
+	if (c == SINGLE_QUOTE && quote_state != 2)
+	{
+		if (quote_state == 1)
+			return (0);
+		return (1);
+	}
+	if (c == DOUBLE_QUOTE && quote_state != 1)
+	{
+		if (quote_state == 2)
+			return (0);
+		return (2);
+	}
+	return (quote_state);
+}
+
 int	ft_validate_quotes(const char *line)
 {
 	int	quote_state;
@@ -49,20 +64,7 @@ int	ft_validate_quotes(const char *line)
 	quote_state = 0;
 	while (*line)
 	{
-		if (*line == SINGLE_QUOTE && quote_state != 2)
-		{
-			if (quote_state == 1)
-				quote_state = 0;
-			else
-				quote_state = 1;
-		}
-		else if (*line == DOUBLE_QUOTE && quote_state != 1)
-		{
-			if (quote_state == 2)
-				quote_state = 0;
-			else
-				quote_state = 2;
-		}
+		quote_state = update_quote_state(*line, quote_state);
 		line++;
 	}
 	if (quote_state == 1)

@@ -19,10 +19,8 @@ static void	init_minishell(t_shell *shell)
 	ft_bzero(shell, sizeof(t_shell));
 }
 
-static int	fetch_user_line(t_shell *shell)
+int	fetch_user_line(t_shell *shell)
 {
-	int	j;
-
 	g_signal = 0;
 	shell->input = ft_readline(shell->prompt);
 	if (!shell->input)
@@ -47,7 +45,7 @@ static int	fetch_user_line(t_shell *shell)
 	return (1);
 }
 
-static int	parse_and_prepare(t_shell *shell)
+int	parse_and_prepare(t_shell *shell)
 {
 	int	status;
 
@@ -72,7 +70,7 @@ static int	parse_and_prepare(t_shell *shell)
 	return (shell->cmds != NULL);
 }
 
-static void	execute_pipeline(t_shell *shell)
+void	execute_pipeline(t_shell *shell)
 {
 	shell->length = ft_lstsize(shell->cmds);
 	if (process_all_heredocs(shell->cmds, shell) == 0)
