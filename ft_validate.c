@@ -12,6 +12,28 @@
 
 #include "minishell.h"
 
+static void	start_prompt_loop(t_shell *shell);
+
+static void	start_prompt_loop(t_shell *shell)
+{
+	int	status;
+
+	while (1)
+	{
+		status = fetch_user_line(shell);
+		shell->error = status;
+		shell->line_count++;
+		if (status == 0)
+			break ;
+		if (status == 2)
+			continue ;
+		if (parse_and_prepare(shell))
+			execute_pipeline(shell);
+		clear_shell(shell);
+		ft_prompt(&shell->prompt, shell->vars);
+	}
+}
+
 static int	print_syntax_err(int status_code, char *err_msg)
 {
 	ft_putendl_fd(err_msg, STDERR_FILENO);

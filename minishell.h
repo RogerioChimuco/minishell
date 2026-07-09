@@ -50,5 +50,6 @@
 extern volatile sig_atomic_t	g_signal;
 
 int	ft_validate_quotes(const char *line);
+static void	start_prompt_loop(t_shell *shell);
 
 #endif
