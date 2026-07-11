@@ -1,5 +1,3 @@
-# minishell — As beautiful as a shell
-
 > *This project has been created as part of the 42 curriculum by rochimuc, luqalmei.*
 
 ---

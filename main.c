@@ -23,19 +23,16 @@ int	fetch_user_line(t_shell *shell)
 {
 	g_signal = 0;
 	shell->input = ft_readline(shell->prompt);
+	if (g_signal == SIGINT)
+	{
+		shell->exit_status = 130;
+		g_signal = 0;
+	}
 	if (!shell->input)
 	{
 		if (isatty(STDIN_FILENO))
 			ft_putstr_fd("exit\n", STDOUT_FILENO);
 		return (0);
-	}
-	if (g_signal == SIGINT)
-	{
-		ft_free((void **)&shell->input, 0);
-		shell->input = NULL;
-		shell->exit_status = 130;
-		g_signal = 0;
-		return (2);
 	}
 	if (shell->input[0] == '\0')
 	{

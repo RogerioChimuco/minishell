@@ -14,7 +14,7 @@
 #	Variáveis para processo de compilação
 
 CC	= cc
-CFLAGS 	= -Wall -Wextra -Werror
+CFLAGS 	= -Wall -Wextra -Werror -g
 
 SRC_PARSE    = parser/ft_check_syntax.c \
 	       parser/parser.c \

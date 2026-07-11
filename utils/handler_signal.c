@@ -18,7 +18,6 @@ static void	reset_prompt_line(void)
 	rl_replace_line("", 0);
 	rl_on_new_line();
 	rl_redisplay();
-	rl_done = 1;
 }
 
 void	handler(int sig)
@@ -31,13 +30,7 @@ void	handler(int sig)
 
 void	handler_exec(int sig)
 {
-	static const char	*msgs[] = {"\n", "Quit (core dumped)\n"};
-
 	g_signal = sig;
-	if (sig == SIGINT)
-		write(1, msgs[0], 1);
-	else if (sig == SIGQUIT)
-		write(1, msgs[1], 19);
 }
 
 void	setup_prompt_signal(void)

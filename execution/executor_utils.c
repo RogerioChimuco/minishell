@@ -90,8 +90,6 @@ void	wait_pipeline(t_shell *shell)
 	signal(SIGINT, handler_exec);
 	signal(SIGQUIT, handler_exec);
 	wait_pids(shell, shell->pid_i);
-	if (g_signal == SIGINT)
-		write (1, "\n", 1);
 	signal(SIGINT, handler);
 	signal(SIGQUIT, SIG_IGN);
 	g_signal = 0;

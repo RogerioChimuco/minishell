@@ -27,7 +27,9 @@ static void	set_exit_status(t_shell *shell, int status)
 	else if (WIFSIGNALED(status))
 	{
 		shell->exit_status = 128 + WTERMSIG(status);
-		if (shell->exit_status == 131)
+		if (WTERMSIG(status) == SIGINT)
+			write(1, "\n", 1);
+		else if (WTERMSIG(status) == SIGQUIT)
 			ft_putendl_fd("Quit (core dumped)", 1);
 	}
 	else
@@ -39,6 +41,7 @@ void	wait_pids(t_shell *shell, int pid_i)
 	int	status;
 	int	iter;
 
+	status = 0;
 	iter = -1;
 	while (++iter < pid_i)
 		waitpid(shell->pids[iter], &status, 0);
